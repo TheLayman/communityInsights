@@ -1,12 +1,12 @@
 import { App } from "@microsoft/teams.apps";
 import { DevtoolsPlugin } from "@microsoft/teams.dev";
 import { McpPlugin } from "@microsoft/teams.mcp";
-import { fetchStackPosts } from "./collector/stack";
-import { fetchGitHubIssues } from "./collector/github";
 import { extractInsights } from "./extractor";
 import { z } from "zod";
 
 // Create MCP server plugin with a simple echo and data collection tool
+const feedbackItems: any[] = [];
+
 const mcpServerPlugin = new McpPlugin({
   name: "community-insights",
   description: "MCP server for collecting community feedback",
@@ -23,17 +23,24 @@ const mcpServerPlugin = new McpPlugin({
     {}
   )
   .tool(
-    "collectInsights",
-    "Fetch latest SO & GH posts",
-    z.object({}),
-    async () => {
-      const items = [
-        ...(await fetchGitHubIssues()),
-        ...(await fetchStackPosts()),
-      ];
-      return {
-        content: [{ type: "text", text: JSON.stringify(items) }],
-      };
+    "ingestFeedback",
+    "Store feedback items provided by the MCP client",
+    z.object({
+      items: z
+        .array(
+          z.object({
+            id: z.string(),
+            source: z.string(),
+            url: z.string(),
+            text: z.string(),
+            createdAt: z.string(),
+          })
+        )
+        .describe("feedback items"),
+    }),
+    async ({ items }: { items: any[] }) => {
+      feedbackItems.push(...items);
+      return { content: [{ type: "text", text: "ok" }] };
     },
     {}
   );
@@ -59,10 +66,11 @@ app.on("message", async ({ context, stream, activity }) => {
     return;
   }
 
-  const posts = [
-    ...(await fetchGitHubIssues()),
-    ...(await fetchStackPosts()),
-  ];
+  const posts = feedbackItems.splice(0, feedbackItems.length);
+  if (posts.length === 0) {
+    await send("No feedback available. Run the client to ingest posts.");
+    return;
+  }
 
   const deduped = new Map<string, any>();
 
