@@ -8,6 +8,6 @@ module.exports = {
   splitting: true,
   clean: true,
   outDir: 'dist',
-  entry: ['src/index.ts'],
+  entry: ['src/index.ts', 'src/client.ts'],
   format: ['cjs'],
 };
