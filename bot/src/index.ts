@@ -88,23 +88,33 @@ app.on("message", async ({ context, stream, activity }) => {
   const insights = Array.from(deduped.values());
   console.log("Extracted insights:", insights);
 
-  const attachments = insights.map((i) => ({
-    contentType: "application/vnd.microsoft.card.adaptive",
-    content: {
-      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-      type: "AdaptiveCard",
-      version: "1.5",
-      body: [
-        { type: "TextBlock", text: `Category: ${i.category}` },
-        { type: "TextBlock", text: `Summary: ${i.summary}`, wrap: true },
-        { type: "TextBlock", text: `Severity: ${i.severity}` },
-        { type: "TextBlock", text: `Age: ${i.ageDays} days` },
-        { type: "TextBlock", text: `[View](${i.url})` },
-      ],
-    },
-  }));
+  const severityOrder: Record<string, number> = { High: 3, Medium: 2, Low: 1 };
+  insights.sort((a, b) => {
+    const sevDiff = (severityOrder[b.severity] || 0) - (severityOrder[a.severity] || 0);
+    if (sevDiff !== 0) {
+      return sevDiff;
+    }
+    return a.ageDays - b.ageDays;
+  });
 
-  await send({ attachments });
+  for (const i of insights) {
+    const attachment = {
+      contentType: "application/vnd.microsoft.card.adaptive",
+      content: {
+        $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+        type: "AdaptiveCard",
+        version: "1.5",
+        body: [
+          { type: "TextBlock", text: `Category: ${i.category}` },
+          { type: "TextBlock", text: `Summary: ${i.summary}`, wrap: true },
+          { type: "TextBlock", text: `Severity: ${i.severity}` },
+          { type: "TextBlock", text: `Age: ${i.ageDays} days` },
+          { type: "TextBlock", text: `[View](${i.url})` },
+        ],
+      },
+    };
+    await send({ attachments: [attachment] });
+  }
 });
 
 app.start();
