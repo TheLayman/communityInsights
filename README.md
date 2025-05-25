@@ -39,7 +39,9 @@ npm run dev
 
 The bot exposes an MCP server at `http://localhost:3000/mcp` and a devtools inspector at `http://localhost:6274/`.
 
-Send `insights` to the bot in Teams or in the MCP inspector to fetch the latest GitHub issues and Stack Overflow questions. The bot analyzes the items with the configured model and returns an Adaptive Card containing categorized summaries and severity estimates.
+`npm run dev` now also launches the feedback client which polls GitHub and Stack Overflow every five minutes and forwards posts to the server.
+
+After the client has ingested posts, send `insights` to the bot in Teams (or in the MCP inspector) to analyze the collected feedback. The bot returns an Adaptive Card with categorized summaries and severity estimates.
 
 ## Building for Production
 
