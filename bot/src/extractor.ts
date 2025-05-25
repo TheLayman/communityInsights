@@ -20,21 +20,25 @@ Respond *only* with the JSON.`,
  */
 export async function extractInsights(text: string) {
   const result = await extractorPrompt.send(text);
-  // LLM returns the JSON as the first content item
+  // LLM returns the JSON as the first content item which may be wrapped in
+  // code fences or other text. Normalise it to a raw string first.
   console.log(result);
   const content = result.content[0];
-  let jsonString: string;
+  const raw =
+    typeof content === "string"
+      ? content
+      : typeof content === "object" && "text" in content
+        ? content.text
+        : "";
 
-  if (typeof content === "string") {
-    jsonString = content;
-  } else if (typeof content === "object" && "text" in content) {
-    jsonString = content.text;
-  } else {
-    throw new Error("Unexpected extractor response format");
+  // Try to locate a JSON object inside the response and parse it. This is more
+  // tolerant of minor formatting variations like ```json fences.
+  const match = raw.trim().match(/\{[\s\S]*\}/);
+  if (!match) {
+    throw new Error(`Unable to parse JSON from: ${raw}`);
   }
 
-  // Parse and return the JSON
-  return JSON.parse(jsonString) as {
+  return JSON.parse(match[0]) as {
     category: string;
     summary: string;
     severity: string;
