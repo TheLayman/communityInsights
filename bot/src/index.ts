@@ -43,10 +43,14 @@ const app = new App({
 });
 
 // Simple message handler that returns extracted insights as an Adaptive Card
-app.on("message", async ({ context, activity }) => {
+app.on("message", async ({ context, stream, activity }) => {
+  const send = context?.sendActivity
+    ? (m: any) => context.sendActivity(m)
+    : (m: any) => stream.emit({ type: "message", value: m });
+
   const text = activity.text?.toLowerCase() ?? "";
   if (!text.startsWith("insights")) {
-    await context.sendActivity("Send 'insights' to fetch community feedback.");
+    await send("Send 'insights' to fetch community feedback.");
     return;
   }
 
@@ -72,7 +76,7 @@ app.on("message", async ({ context, activity }) => {
     })),
   };
 
-  await context.sendActivity({
+  await send({
     attachments: [
       { contentType: "application/vnd.microsoft.card.adaptive", content: card },
     ],
