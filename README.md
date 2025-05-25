@@ -37,7 +37,9 @@ To start the bot locally with hot‑reloading:
 npm run dev
 ```
 
-The bot exposes an MCP server at `http://localhost:3000/mcp` and a devtools inspector at `http://localhost:6274/`.
+The bot exposes an MCP server at `http://localhost:3000/mcp` and a devtools inspector at
+`http://localhost:6274/?transport=streamable-http&serverUrl=http://localhost:3000/mcp`.
+Open that full URL in your browser so the inspector connects to the running server.
 
 Run the MCP client in **another terminal** so it connects to the running server. The client continuously pulls posts every five minutes:
 

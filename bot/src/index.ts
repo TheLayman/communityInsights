@@ -52,15 +52,15 @@ const app = new App({
 // Simple message handler that returns extracted insights as an Adaptive Card
 app.on("message", async ({ context, stream, activity }) => {
   const send = (msg: any) => {
+    const activityMsg =
+      typeof msg === "string" ? { type: "message", text: msg } : { type: "message", ...msg };
     if (context?.sendActivity) {
-      return context.sendActivity(msg);
+      return context.sendActivity(activityMsg);
     }
-    const activity =
-      typeof msg === "string" ? { type: "message", text: msg } : msg;
-    return stream.emit(activity);
+    return stream.emit(activityMsg);
   };
 
-  const text = activity.text?.toLowerCase() ?? "";
+  const text = activity.text?.trim().toLowerCase() ?? "";
   if (!text.startsWith("insights")) {
     await send("Send 'insights' to fetch community feedback.");
     return;
