@@ -21,6 +21,7 @@ Respond *only* with the JSON.`,
 export async function extractInsights(text: string) {
   const result = await extractorPrompt.send(text);
   // LLM returns the JSON as the first content item
+  console.log(result);
   const content = result.content[0];
   let jsonString: string;
 
