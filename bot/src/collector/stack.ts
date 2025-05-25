@@ -18,7 +18,7 @@ export async function fetchStackPosts(
       order: "desc",
       fromdate: fromDate,   // still limit to last `hours`
       pagesize: pageSize,
-      filter: "withbody", // ← remove this for now
+      filter: "withbody", 
     },
   });
 
@@ -27,7 +27,7 @@ export async function fetchStackPosts(
     id: `so-${q.question_id}`,
     source: "stackoverflow",
     url: q.link,
-    // if you need the body, you can request a custom filter later:
-    text: `${q.title}\n\n${q.body_markdown ?? q.body ?? ""}`
+    text: q.title,
+    // text: `${q.title}\n\n${q.body_markdown ?? q.body ?? ""}`
   }));
 }
