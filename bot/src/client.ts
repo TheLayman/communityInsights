@@ -1,7 +1,6 @@
 import "dotenv/config";
 import { ChatPrompt } from "@microsoft/teams.ai";
 import { McpClientPlugin } from "@microsoft/teams.mcpclient";
-import axios from "axios";
 import { fetchGitHubIssues } from "./collector/github";
 import { fetchStackPosts } from "./collector/stack";
 import { myModel } from "./modelInstance";
@@ -11,23 +10,20 @@ const mcpUrl = process.env.MCP_SERVER_URL || "http://localhost:3000/mcp";
 async function createPrompt() {
   try {
     console.log(`Connecting to MCP server at ${mcpUrl}`);
-    await axios.get(mcpUrl);
-    console.log(`Successfully connected to MCP server at ${mcpUrl}`);
-  } catch {
-    console.error(`Unable to reach MCP server at ${mcpUrl}. Is the server running?`);
-    process.exit(1);
-  }
-
-  try {
-    return new ChatPrompt(
+    // Creating the prompt loads the MCP schema. If the server is unreachable
+    // the plugin will throw which we catch below.
+    const prompt = new ChatPrompt(
       {
         instructions: "Forward community posts to the ingestFeedback tool.",
         model: myModel,
       },
       [new McpClientPlugin()]
     ).usePlugin("mcpClient", { url: mcpUrl });
+
+    console.log(`Successfully connected to MCP server at ${mcpUrl}`);
+    return prompt;
   } catch {
-    console.warn(`Could not load MCP schema; is the server running at ${mcpUrl}?`);
+    console.error(`Could not load MCP schema; is the server running at ${mcpUrl}?`);
     process.exit(1);
   }
 }
