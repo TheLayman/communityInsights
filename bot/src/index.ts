@@ -69,7 +69,7 @@ app.on("message", async ({ context, stream, activity }) => {
     const insight = await extractInsights(post.text);
     insights.push({ ...post, ...insight });
   }
-
+  console.log("Extracted insights:", insights);
   const card = {
     $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
     type: "AdaptiveCard",

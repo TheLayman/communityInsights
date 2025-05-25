@@ -4,7 +4,7 @@ const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 export async function fetchGitHubIssues(
 owner = "OfficeDev",
 repo  = "microsoft-teams-library-js",
-  perPage = 1
+  perPage = 10
 ) {
   const { data } = await octokit.rest.issues.listForRepo({
     owner,
@@ -17,6 +17,6 @@ repo  = "microsoft-teams-library-js",
     source: "github",
     url: issue.html_url!,
     text:issue.title,
-    // text: issue.title + "\n\n" + (issue.body || ""),
+    text: issue.title + "\n\n" + (issue.body || ""),
   }));
 }
