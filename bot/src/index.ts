@@ -44,9 +44,14 @@ const app = new App({
 
 // Simple message handler that returns extracted insights as an Adaptive Card
 app.on("message", async ({ context, stream, activity }) => {
-  const send = context?.sendActivity
-    ? (m: any) => context.sendActivity(m)
-    : (m: any) => stream.emit({ type: "message", value: m });
+  const send = (msg: any) => {
+    if (context?.sendActivity) {
+      return context.sendActivity(msg);
+    }
+    const activity =
+      typeof msg === "string" ? { type: "message", text: msg } : msg;
+    return stream.emit(activity);
+  };
 
   const text = activity.text?.toLowerCase() ?? "";
   if (!text.startsWith("insights")) {
