@@ -105,11 +105,35 @@ app.on("message", async ({ context, stream, activity }) => {
         type: "AdaptiveCard",
         version: "1.5",
         body: [
-          { type: "TextBlock", text: `Category: ${i.category}` },
-          { type: "TextBlock", text: `Summary: ${i.summary}`, wrap: true },
-          { type: "TextBlock", text: `Severity: ${i.severity}` },
-          { type: "TextBlock", text: `Age: ${i.ageDays} days` },
-          { type: "TextBlock", text: `[View](${i.url})` },
+          {
+            type: "Container",
+            style: "emphasis",
+            items: [
+              {
+                type: "TextBlock",
+                text: i.summary,
+                wrap: true,
+                weight: "Bolder",
+                size: "Medium",
+              },
+              {
+                type: "FactSet",
+                facts: [
+                  { title: "Category", value: i.category },
+                  { title: "Severity", value: i.severity },
+                  { title: "Age", value: `${i.ageDays} days` },
+                  { title: "Source", value: i.source },
+                ],
+              },
+            ],
+          },
+        ],
+        actions: [
+          {
+            type: "Action.OpenUrl",
+            title: "View",
+            url: i.url,
+          },
         ],
       },
     };
