@@ -39,11 +39,15 @@ npm run dev
 
 The bot exposes an MCP server at `http://localhost:3000/mcp` and a devtools inspector at `http://localhost:6274/`.
 
-Run the feedback client to continuously pull posts from GitHub and Stack Overflow and send them to the bot via MCP. The client fetches new posts every five minutes:
+Run the MCP client in **another terminal** so it connects to the running server. The client continuously pulls posts every five minutes:
 
 ```bash
-node dist/client.js
+# from bot directory
+npm run dev        # start the server
+npx ts-node src/client.ts   # in another terminal
 ```
+
+Adjust the `MCP_SERVER_URL` environment variable if you change the port from the default.
 
 After ingesting posts, send `insights` to the bot in Teams (or in the MCP inspector) to analyze the collected feedback. The bot returns an Adaptive Card with categorized summaries and severity estimates.
 
