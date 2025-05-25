@@ -119,10 +119,10 @@ app.on("message", async ({ context, stream, activity }) => {
               {
                 type: "FactSet",
                 facts: [
-                  { title: "Category", value: i.category },
-                  { title: "Severity", value: i.severity },
-                  { title: "Age", value: `${i.ageDays} days` },
-                  { title: "Source", value: i.source },
+                  { title: "Category: ", value: i.category },
+                  { title: "Severity: ", value: i.severity },
+                  { title: "Age: ", value: `${i.ageDays} days` },
+                  { title: "Source: ", value: i.source },
                 ],
               },
             ],
@@ -131,7 +131,7 @@ app.on("message", async ({ context, stream, activity }) => {
         actions: [
           {
             type: "Action.OpenUrl",
-            title: "View",
+            title: "View Issue",
             url: i.url,
           },
         ],
