@@ -23,7 +23,7 @@ export async function extractInsights(text: string) {
   // LLM returns the JSON as the first content item which may be wrapped in
   // code fences or other text. Normalise it to a raw string first.
   console.log(result);
-  const content = result.content[0];
+  const content = result.content;
   const raw =
     typeof content === "string"
       ? content
