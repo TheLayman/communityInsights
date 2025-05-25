@@ -64,28 +64,39 @@ app.on("message", async ({ context, stream, activity }) => {
     ...(await fetchStackPosts()),
   ];
 
-  const insights = [] as Array<any>;
+  const deduped = new Map<string, any>();
+
   for (const post of posts) {
     const insight = await extractInsights(post.text);
-    insights.push({ ...post, ...insight });
+    const created = new Date(post.createdAt);
+    const ageDays = Math.floor((Date.now() - created.getTime()) / 86400000);
+    const entry = { ...post, ...insight, ageDays };
+    const key = insight.summary.toLowerCase();
+    if (!deduped.has(key)) {
+      deduped.set(key, entry);
+    }
   }
-  console.log("Extracted insights:", insights);
-  const card = {
-    $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-    type: "AdaptiveCard",
-    version: "1.5",
-    body: insights.map((i) => ({
-      type: "TextBlock",
-      text: `**${i.source}** [link](${i.url})\nCategory: ${i.category}\nSeverity: ${i.severity}\n${i.summary}`,
-      wrap: true,
-    })),
-  };
 
-  await send({
-    attachments: [
-      { contentType: "application/vnd.microsoft.card.adaptive", content: card },
-    ],
-  });
+  const insights = Array.from(deduped.values());
+  console.log("Extracted insights:", insights);
+
+  const attachments = insights.map((i) => ({
+    contentType: "application/vnd.microsoft.card.adaptive",
+    content: {
+      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+      type: "AdaptiveCard",
+      version: "1.5",
+      body: [
+        { type: "TextBlock", text: `Category: ${i.category}` },
+        { type: "TextBlock", text: `Summary: ${i.summary}`, wrap: true },
+        { type: "TextBlock", text: `Severity: ${i.severity}` },
+        { type: "TextBlock", text: `Age: ${i.ageDays} days` },
+        { type: "TextBlock", text: `[View](${i.url})` },
+      ],
+    },
+  }));
+
+  await send({ attachments });
 });
 
 app.start();
