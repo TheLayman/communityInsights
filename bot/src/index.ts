@@ -25,7 +25,7 @@ const mcpServerPlugin = new McpPlugin({
   .tool(
     "ingestFeedback",
     "Store feedback items provided by the MCP client",
-    z.object({
+    {
       items: z
         .array(
           z.object({
@@ -37,7 +37,7 @@ const mcpServerPlugin = new McpPlugin({
           })
         )
         .describe("feedback items"),
-    }),
+    },
     async ({ items }: { items: any[] }) => {
       feedbackItems.push(...items);
       return { content: [{ type: "text", text: "ok" }] };
