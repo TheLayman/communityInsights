@@ -22,11 +22,11 @@ export async function fetchStackPosts(
     },
   });
 
-  return res.data.items.map((q: any) => (
-    {
+  return res.data.items.map((q: any) => ({
     id: `so-${q.question_id}`,
     source: "stackoverflow",
     url: q.link,
-    text: `${q.title}\n\n${q.body_markdown ?? q.body ?? ""}`
+    text: `${q.title}\n\n${q.body_markdown ?? q.body ?? ""}`,
+    createdAt: new Date(q.creation_date * 1000).toISOString(),
   }));
 }

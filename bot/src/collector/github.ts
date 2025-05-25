@@ -16,7 +16,7 @@ repo  = "microsoft-teams-library-js",
     id: `gh-${issue.id}`,
     source: "github",
     url: issue.html_url!,
-    text:issue.title,
     text: issue.title + "\n\n" + (issue.body || ""),
+    createdAt: issue.created_at,
   }));
 }
