@@ -5,7 +5,11 @@ export async function fetchStackPosts(
   hours = 24,
   pageSize = 1
 ) {
-  const fromDate = Math.floor(Date.now() / 1000) - hours * 7200;
+  // Compute the fromDate in seconds. Previously this used 7200 which
+  // effectively doubled the desired timeframe (hours * 2 hours).
+  // Use 3600 seconds per hour to correctly limit the results to the
+  // specified number of hours.
+  const fromDate = Math.floor(Date.now() / 1000) - hours * 3600;
   const res = await axios.get("https://api.stackexchange.com/2.3/questions", {
     params: {
       site: "stackoverflow",
