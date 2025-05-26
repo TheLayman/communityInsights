@@ -51,6 +51,9 @@ npx ts-node src/client.ts   # in another terminal
 
 Adjust the `MCP_SERVER_URL` environment variable if you change the port from the default.
 
+The client records ingested post IDs in `bot/ingested.json`. Subsequent runs
+only send new items. Delete this file if you want to re-ingest everything.
+
 After ingesting posts, send `insights` to the bot in Teams (or in the MCP inspector) to analyze the collected feedback. The bot returns an Adaptive Card with categorized summaries and severity estimates.
 
 ## Building for Production

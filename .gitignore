@@ -29,3 +29,4 @@ coverage/
 
 # Optional: Ignore test output
 test-results/
+ingested.json
