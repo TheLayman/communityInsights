@@ -1,15 +1,15 @@
 import { ChatPrompt } from "@microsoft/teams.ai";
 import { myModel } from "./modelInstance";
+import fs from "fs";
+import path from "path";
+
+// Load few-shot prompt template for extraction
+const templatePath = path.resolve(__dirname, "prompts/extractor.txt");
+const instructions = fs.readFileSync(templatePath, "utf-8");
 
 // Prompt to extract structured insights from raw text
 const extractorPrompt = new ChatPrompt({
-  instructions: `
-You receive a block of text (a StackOverflow question or GitHub issue).
-Extract and return a JSON object with exactly these keys:
-  • category (one word)
-  • summary (a one-sentence pain-point description)
-  • severity (Low, Medium, or High)
-Respond *only* with the JSON.`,
+  instructions,
   model: myModel,
 });
 
