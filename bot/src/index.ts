@@ -86,6 +86,100 @@ const app = new App({
   plugins: [new DevtoolsPlugin(), mcpServerPlugin],
 });
 
+function severityColor(sev: string) {
+  switch (sev.toLowerCase()) {
+    case "high":
+      return "Attention";
+    case "medium":
+      return "Warning";
+    case "low":
+      return "Good";
+    default:
+      return "Default";
+  }
+}
+
+function createInsightCard(i: any) {
+  return {
+    contentType: "application/vnd.microsoft.card.adaptive",
+    content: {
+      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+      type: "AdaptiveCard",
+      version: "1.5",
+      body: [
+        {
+          type: "TextBlock",
+          text: i.summary,
+          wrap: true,
+          weight: "Bolder",
+          size: "Medium",
+        },
+        {
+          type: "ColumnSet",
+          columns: [
+            {
+              type: "Column",
+              width: "stretch",
+              items: [
+                { type: "TextBlock", text: "Category", weight: "Bolder", isSubtle: true, spacing: "None" },
+                { type: "TextBlock", text: i.category, wrap: true },
+              ],
+            },
+            {
+              type: "Column",
+              width: "auto",
+              items: [
+                { type: "TextBlock", text: "Severity", weight: "Bolder", isSubtle: true, spacing: "None" },
+                {
+                  type: "TextBlock",
+                  text: i.severity,
+                  color: severityColor(i.severity) as any,
+                  weight: "Bolder",
+                },
+              ],
+            },
+            {
+              type: "Column",
+              width: "auto",
+              items: [
+                { type: "TextBlock", text: "Age", weight: "Bolder", isSubtle: true, spacing: "None" },
+                { type: "TextBlock", text: `${i.ageDays} days` },
+              ],
+            },
+          ],
+        },
+        { type: "TextBlock", text: `Source: ${i.source}`, isSubtle: true, wrap: true },
+      ],
+      actions: [
+        {
+          type: "Action.OpenUrl",
+          title: "View Details",
+          url: i.url,
+        },
+      ],
+    },
+  };
+}
+
+function createActionCard(actionText: string) {
+  const lines = actionText.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+  const body: any[] = [
+    { type: "TextBlock", text: "Recommended Actions", weight: "Bolder", size: "Medium" },
+  ];
+  for (const line of lines) {
+    body.push({ type: "TextBlock", text: line, wrap: true, spacing: "Small" });
+  }
+  return {
+    contentType: "application/vnd.microsoft.card.adaptive",
+    content: {
+      $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+      type: "AdaptiveCard",
+      version: "1.5",
+      body,
+    },
+  };
+}
+
 // Simple message handler that returns extracted insights as an Adaptive Card
 app.on("message", async ({ context, stream, activity }) => {
   const send = (msg: any) => {
@@ -120,7 +214,7 @@ app.on("message", async ({ context, stream, activity }) => {
     const actionText = await generateActions(
       insights.map((i) => ({ summary: i.summary, severity: i.severity, ageDays: i.ageDays }))
     );
-    await send(actionText);
+    await send({ attachments: [createActionCard(actionText)] });
     return;
   }
 
@@ -134,46 +228,7 @@ app.on("message", async ({ context, stream, activity }) => {
   });
 
   for (const i of insights) {
-    const attachment = {
-      contentType: "application/vnd.microsoft.card.adaptive",
-      content: {
-        $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
-        type: "AdaptiveCard",
-        version: "1.5",
-        body: [
-          {
-            type: "Container",
-            style: "emphasis",
-            items: [
-              {
-                type: "TextBlock",
-                text: i.summary,
-                wrap: true,
-                weight: "Bolder",
-                size: "Medium",
-              },
-              {
-                type: "FactSet",
-                facts: [
-                  { title: "Category: ", value: i.category },
-                  { title: "Severity: ", value: i.severity },
-                  { title: "Age: ", value: `${i.ageDays} days` },
-                  { title: "Source: ", value: i.source },
-                ],
-              },
-            ],
-          },
-        ],
-        actions: [
-          {
-            type: "Action.OpenUrl",
-            title: "View Issue",
-            url: i.url,
-          },
-        ],
-      },
-    };
-    await send({ attachments: [attachment] });
+    await send({ attachments: [createInsightCard(i)] });
   }
 });
 
