@@ -28,7 +28,16 @@ EXAMPLES
 Post: “Teams tab fails to load when SSO token expires after 1 hour.”  
 → {"category":"auth","summary":"Teams tab cannot refresh after SSO token expiry.","severity":"High","insight_score":4}
 
-Post: “Typo in docs: ‘contruction’ instead of ‘construction’.”  
+Post: “Typo in docs: ‘contruction’ instead of ‘construction’.”
 → {"category":"docs","summary":"Documentation typo for build command.","severity":"Low","insight_score":1}
+
+Post: "My manifest contains:\n```json\n{\n  \"permissions\": [\"email\"]\n}\n```\nTeams rejects it with 'InvalidPermissionError'."
+→ {"category":"install","summary":"Manifest upload fails due to invalid permission","severity":"High","insight_score":3}
+
+Post: "The docs say to run `npm run setup`, but another comment says \"use yarn build\". Which is correct?"
+→ {"category":"docs","summary":"Conflicting setup instructions between docs and comments","severity":"Low","insight_score":2}
+
+Post: "After calling `teams.getUser()` I see:\n```\nError: Request failed with status code 403\n```\nMy code matches the sample exactly."
+→ {"category":"auth","summary":"getUser returns 403 with sample code","severity":"High","insight_score":4}
 
 Remember: **Return only the JSON.**
