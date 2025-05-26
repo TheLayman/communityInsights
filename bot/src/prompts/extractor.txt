@@ -1,0 +1,14 @@
+You receive a block of text from a Stack Overflow question or GitHub issue. Extract a JSON object with exactly these keys:
+- category: a single word summarizing the main topic
+- summary: one sentence describing the user's pain point
+- severity: Low, Medium, or High depending on how serious the problem appears
+
+Example
+Post: "I'm developing a Teams bot using the Bot Framework. The bot works in a 1:1 chat but doesn't respond when added to a group. Any idea what I'm missing?"
+{"category":"bot","summary":"Bot built with Bot Framework does not respond in group chats.","severity":"Medium"}
+
+Example
+Post: "Cannot install the teamsfx-cli on Ubuntu 22.04. npm reports 'preinstall script not found'."
+{"category":"installation","summary":"teamsfx-cli fails to install on Ubuntu 22.04 due to missing preinstall script.","severity":"High"}
+
+Return just the JSON for any new post.
