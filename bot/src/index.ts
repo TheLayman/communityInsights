@@ -2,6 +2,7 @@ import { App } from "@microsoft/teams.apps";
 import { DevtoolsPlugin } from "@microsoft/teams.dev";
 import { McpPlugin } from "@microsoft/teams.mcp";
 import { extractInsights } from "./extractor";
+import { generateActions } from "./action";
 import { z } from "zod";
 
 // Store processed insights so repeated "insights" requests don't
@@ -97,8 +98,8 @@ app.on("message", async ({ context, stream, activity }) => {
   };
 
   const text = activity.text?.trim().toLowerCase() ?? "";
-  if (!text.startsWith("insights")) {
-    await send("Send 'insights' to fetch community feedback.");
+  if (!text.startsWith("insights") && !text.startsWith("action")) {
+    await send("Send 'insights' or 'action' to fetch community feedback.");
     return;
   }
 
@@ -114,6 +115,14 @@ app.on("message", async ({ context, stream, activity }) => {
   }
 
   const insights = Array.from(insightsCache.values());
+
+  if (text.startsWith("action")) {
+    const actionText = await generateActions(
+      insights.map((i) => ({ summary: i.summary, severity: i.severity, ageDays: i.ageDays }))
+    );
+    await send(actionText);
+    return;
+  }
 
   const severityOrder: Record<string, number> = { High: 3, Medium: 2, Low: 1 };
   insights.sort((a, b) => {
