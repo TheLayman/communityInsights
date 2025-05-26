@@ -2,7 +2,7 @@ import axios from "axios";
 
 export async function fetchStackPosts(
   tag = "microsoft-teams",   // or "teamsfx" or any tag you prefer
-  hours = 48,
+  hours = 480,
   pageSize = 10
 ) {
   // Compute the fromDate in seconds. Previously this used 7200 which
