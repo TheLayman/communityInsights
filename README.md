@@ -56,6 +56,8 @@ only send new items. Delete this file if you want to re-ingest everything.
 
 After ingesting posts, send `insights` to the bot in Teams (or in the MCP inspector) to analyze the collected feedback. The bot returns an Adaptive Card with categorized summaries and severity estimates.
 
+You can also send `action` to receive a plain‑text list of the five most urgent issues sorted by severity and age. Use this command when you just want a quick set of prioritized follow‑ups instead of the full card.
+
 ## Building for Production
 
 Compile the TypeScript sources with:
