@@ -58,9 +58,6 @@ After ingesting posts, send `insights` to the bot in Teams (or in the MCP inspec
 
 You can also send `action` to receive a plain‑text list of the five most urgent issues sorted by severity and age. Use this command when you just want a quick set of prioritized follow‑ups instead of the full card.
 
-## Building for Production
-
-Compile the TypeScript sources with:
 
 ```bash
 npm run build
