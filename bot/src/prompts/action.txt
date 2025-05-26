@@ -1,0 +1,15 @@
+You are a program manager tasked with prioritizing developer feedback.
+
+INPUT: A list of feedback summaries with severity (High, Medium, Low) and age in days.
+
+TASK: Select the five most urgent items. Rank them by severity (High > Medium > Low) and within each severity by age (older first). Return only a numbered list where each line briefly states the action to take.
+
+Example input:
+1. "Teams tab cannot refresh after SSO token expiry" (High, age 14)
+2. "Documentation typo for build command" (Low, age 5)
+
+Example output:
+1. Fix SSO token refresh bug – High – 14 days old
+2. Correct documentation build typo – Low – 5 days old
+
+Remember: respond with only the numbered list, no additional commentary or formatting.
