@@ -4,8 +4,38 @@ import { McpPlugin } from "@microsoft/teams.mcp";
 import { extractInsights } from "./extractor";
 import { z } from "zod";
 
+// Store processed insights so repeated "insights" requests don't
+// trigger new LLM calls unless there's new data.
+const processedIds = new Set<string>();
+const processingQueue: any[] = [];
+const insightsCache = new Map<string, any>();
+let processingPromise: Promise<void> | null = null;
+
+async function processQueue() {
+  if (processingPromise) {
+    return processingPromise;
+  }
+
+  processingPromise = (async () => {
+    while (processingQueue.length > 0) {
+      const post = processingQueue.shift()!;
+      const insight = await extractInsights(post.text);
+      const created = new Date(post.createdAt);
+      const ageDays = Math.floor((Date.now() - created.getTime()) / 86400000);
+      const entry = { ...post, ...insight, ageDays };
+      const key = insight.summary.toLowerCase();
+      if (!insightsCache.has(key)) {
+        insightsCache.set(key, entry);
+      }
+    }
+  })().finally(() => {
+    processingPromise = null;
+  });
+
+  return processingPromise;
+}
+
 // Create MCP server plugin with a simple echo and data collection tool
-const feedbackItems: any[] = [];
 
 const mcpServerPlugin = new McpPlugin({
   name: "community-insights",
@@ -39,7 +69,13 @@ const mcpServerPlugin = new McpPlugin({
         .describe("feedback items"),
     },
     async ({ items }: { items: any[] }) => {
-      feedbackItems.push(...items);
+      for (const item of items) {
+        if (!processedIds.has(item.id)) {
+          processedIds.add(item.id);
+          processingQueue.push(item);
+        }
+      }
+      processQueue();
       return { content: [{ type: "text", text: "ok" }] };
     },
     {}
@@ -66,27 +102,18 @@ app.on("message", async ({ context, stream, activity }) => {
     return;
   }
 
-  const posts = feedbackItems.splice(0, feedbackItems.length);
-  if (posts.length === 0) {
+  // Ensure any queued feedback items have been processed.
+  processQueue();
+  if (processingPromise) {
+    await processingPromise;
+  }
+
+  if (insightsCache.size === 0) {
     await send("No feedback available. Run the client to ingest posts.");
     return;
   }
 
-  const deduped = new Map<string, any>();
-
-  for (const post of posts) {
-    const insight = await extractInsights(post.text);
-    const created = new Date(post.createdAt);
-    const ageDays = Math.floor((Date.now() - created.getTime()) / 86400000);
-    const entry = { ...post, ...insight, ageDays };
-    const key = insight.summary.toLowerCase();
-    if (!deduped.has(key)) {
-      deduped.set(key, entry);
-    }
-  }
-
-  const insights = Array.from(deduped.values());
-  console.log("Extracted insights:", insights);
+  const insights = Array.from(insightsCache.values());
 
   const severityOrder: Record<string, number> = { High: 3, Medium: 2, Low: 1 };
   insights.sort((a, b) => {
